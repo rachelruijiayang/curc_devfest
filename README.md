@@ -32,7 +32,7 @@ A robot is just an system in which sensors (such as cameras) connect to processo
 - [Level 2: Basic OpenCV](#level2)
 - [Level 3: Using CV Output to Actuate the Turtle](#level3)
 - [Level 4: Face Detection using OpenCV](#level4)
-- [Level5: What's next?](#level5)
+- [Level 5: What's next?](#level5)
 
 <a href="#top" class="top" id="level0"></a>
 # Level 0: Environment Setup
@@ -92,6 +92,7 @@ The filesystem level concepts mainly cover ROS resources that you encounter on d
 
 ## The ROS Computation Graph
 A robot system can be thought of as a peer-to-peer network of sensors, processors, and actuators. Each of these components will run a ROS process. The ROS Computation Graph is the peer-to-peer network of ROS processes that make up one robot system and are processing data together. The basic Computation Graph concepts of ROS are nodes, Master, Parameter Server, messages, and topics.
+
 ![ROS Computation Graph](http://ros.org/images/wiki/ROS_basic_concepts.png)
 - **Nodes**: Nodes are processes that perform computation. ROS is designed to be modular at a fine-grained scale; a robot control system usually comprises many nodes. For example, one node controls a laser range-finder, one node controls the wheel motors, one node performs localization, one node performs path planning, one Node provides a graphical view of the system, and so on. A ROS node is written with the use of a ROS client library, such as roscpp or rospy.
 - **Master**: The ROS Master provides name registration and lookup to the rest of the Computation Graph. Without the Master, nodes would not be able to find each other, exchange messages, or invoke services.
@@ -569,5 +570,5 @@ Next, let's verify that that the webcam is connected to your VM. Go to the Ubunt
 To skip to the start of Level 3: `git checkout level3`
 # Level 4: Face Detection using OpenCV
 To skip to the start of Level 4: `git checkout level4`
-# Level5: What’s next?
+# Level 5: What’s next?
 To skip to the start of Level 5: `git checkout level5`
