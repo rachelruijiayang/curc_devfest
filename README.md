@@ -44,6 +44,7 @@ Download VirtualBox from this page: https://www.virtualbox.org/wiki/Downloads
 Under **VirtualBox 5.2.6 platform packages**, select your host OS, and then download and click on the executable. Click "Next" or "Install" at each prompt.
 
 Next, from the same page, download **VirtualBox 5.2.6 Oracle VM VirtualBox Extension Pack**. Click on the link "All supported platforms". You will start downloading a file named **Oracle_VM_VirtualBox_Extension_Pack-5.2.6-120293.vbox-extpack**. Click on the file, and after the VirtualBox window pops up, click **Install**.
+
 ![enter image description here](https://github.com/rachelruijiayang/curc_devfest/blob/master/resources/vmware_extension_pack.PNG?raw=true)
 
 ### Importing the RoboticsTrack VM Image
@@ -149,7 +150,9 @@ To run the node from the `turtlesim` package named `turtlesim_node`, type:
 ```
 $ rosrun turtlesim turtlesim_node
 ```
-You will see the `turtlesim` window:![enter image description here](http://wiki.ros.org/ROS/Tutorials/UnderstandingNodes?action=AttachFile&do=get&target=turtlesim.png)
+You will see the `turtlesim` window:
+
+![enter image description here](http://wiki.ros.org/ROS/Tutorials/UnderstandingNodes?action=AttachFile&do=get&target=turtlesim.png)
 
 In a new terminal:
 ```
@@ -167,6 +170,7 @@ Without closing the previous terminals, you can drive the turtle around its wind
 rosrun turtlesim turtle_telop_key
 ```
 Now you can use the arrow (up, down, left, right) keys of the keyboard to drive the turtle around. If you can not drive the turtle **select the terminal window in which you started `turtle_teleop_key`** to make sure that the keys that you type are recorded.
+
 ![enter image description here](http://wiki.ros.org/ROS/Tutorials/UnderstandingTopics?action=AttachFile&do=get&target=turtle_key.png)
 
 `turtle_teleop_key` converts input keystrokes into velocity commands for the turtle. For example, the up key is converted into a command to move with some velocity in the up direction.  `turtle_teleop_key` **publishes** those velocity commands on a ROS **topic**. Our original `turtlesim` node **subscribes** to the same topic to receive the velocity commands.
