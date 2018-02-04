@@ -31,7 +31,7 @@ A robot is just an system in which sensors (such as cameras) connect to processo
 - [Level 2: Basic OpenCV](#level2)
 - [Level 3: Using CV Output to Actuate the Turtle](#level3)
 - [Level 4: Face Detection using OpenCV](#level4)
-- [Level5: What's next?](#level5)
+- [Level 5: What's next?](#level5)
 
 <a href="#top" class="top" id="level0"></a>
 # Level 0: Environment Setup
