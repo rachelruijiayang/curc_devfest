@@ -7,15 +7,22 @@ Written and developed by [Rachel Yang](https://github.com/rachelruijiayang), [Ig
 
 Portions of this tutorial are adapted from [NVIDIA's Robotics Teaching Kit with 'Jet'](https://developer.nvidia.com/teaching-kits), [*ROS Robotics Projects* by Lentin Joseph](https://www.amazon.com/ROS-Robotics-Projects-Lentin-Joseph/dp/1783554711) (available to Columbia students through [CLIO](https://clio.columbia.edu/quicksearch?q=ros+robotics+projects)), and [*Effective Robotics Programming with ROS - Third Edition* by Anil Mahtani and Luis Sanchez](https://www.amazon.com/Effective-Robotics-Programming-ROS-Third/dp/1786463652) (also available through [CLIO](https://clio.columbia.edu/quicksearch?q=effective+robotics+programming+with+ros+third+edition&commit=Search)).
 
-## What We're Building
-Throughout this tutorial, we're going to build a ROS system that uses a webcam and computer vision to *sense* the location of the user's face and then *actuate* a simulated turtle to follow the user's face.
+## About this Tutorial
 
-This document advances linearly, meaning that level 2 builds atop level 1, level 3 atop level 2, and so on. Each level after level 1 has its own branch in the [GitHub repository](https://github.com/rachelruijiayang/catkin_ws) for this tutorial. If you don't want to do each level in order, you can `git checkout` the branch for the level you would like to skip to.
+This tutorial differs from other DevFest tracks in that it does not work towards one specific final product. Instead, Levels 0 - 2 provide learners with an environment setup and practice with ROS and computer vision basics.
+
+Levels 1 and 2 have their own branch in the [GitHub repository](https://github.com/rachelruijiayang/catkin_ws) for our ROS workspace (`~/catkin_ws`). If you don't want  to do Level 1, go to `~/catkin_ws` and `git checkout level2`. If you don't want to do Level 2, `git checkout adventure`.
+
+After Level 2, you will have the skills to work on projects of your choice from Lentin Joseph's *ROS Robotics Projects*. We could not reproduce the contents of that book in this tutorial for copyright reasons, but the book is available to Columbia students for free through [CLIO](https://clio.columbia.edu/quicksearch?q=ros+robotics+projects). We've starred our favorite projects and provided tips and adjustments for them [here](#rrp_table_of_contents).
 
 ## Why learn ROS?
 ROS is an open-source framework for building robots. 
 
-A robot is just an system in which sensors (such as cameras) connect to processors, which connect to actuators to make the robot move (or take some other action). ROS provides a publish-subscribe messaging infrastructure that makes it easier for different parts of a robot system to talk to each other. ROS also provides an extensive set of tools for configuring, starting, debugging, simulating, testing, and stopping robot systems. Finally, ROS provides a broad collection of open-source libraries that implement useful robot functionality, with a focus on mobility, manipulation, and perception, and a large active developer community. [[Source]](https://answers.ros.org/question/12230/what-is-ros-exactly-middleware-framework-operating-system/)
+A robot is a system in which sensors (such as cameras) connect to processors, which connect to actuators to make the robot move (or make some other decision). ROS provides a publish-subscribe messaging infrastructure that makes it easier for different parts of a robot system to talk to each other. In Levels 1 and 2 of this tutorial, you will write your own ROS publisher and subscriber in C++.
+
+ROS also provides an extensive set of tools for configuring, starting, debugging, simulating, testing, and stopping robot systems. In this tutorial, you will familiarize yourself with the tools  rqt_graph, rostopic, rospub, rosnode, and more.
+
+Finally, ROS provides a broad collection of open-source libraries that implement useful robot functionality, with a focus on mobility, manipulation, and perception, and a large active developer community. [[Source]](https://answers.ros.org/question/12230/what-is-ros-exactly-middleware-framework-operating-system/) Level 2 of this tutorial walks you through the basics of one ROS-integrated library, OpenCV. After Level 2, you will have the skills to play with open source ROS packages and integrations for chatbots, deep learning, and more.
 
 [Here are some past robots that have been built using ROS.](https://www.youtube.com/watch?v=Z70_3wMFO24)
 
@@ -23,20 +30,18 @@ A robot is just an system in which sensors (such as cameras) connect to processo
 
  - A computer with a webcam (required for the computer vision sections)
  - At least 25 GB of free storage space on your computer (to install the VM)
- - Prior programming experience, especially in C++
+ - Prior programming experience, especially in C++ and Python
  - Familiarity with using the Linux terminal
 
 # Table of Contents
 - [Level 0: Environment Setup](#level0)
 - [Level 1: Intro to ROS](#level1)
 - [Level 2: Basic OpenCV](#level2)
-- [Level 3: Using CV Output to Actuate the Turtle](#level3)
-- [Level 4: Face Detection using OpenCV](#level4)
-- [Level 5: What's next?](#level5)
+- [Choose Your Own Adventure: *ROS Robotics Projects*](#rrp_table_of_contents)
 
 <a href="#top" class="top" id="level0"></a>
 # Level 0: Environment Setup
-To develop in the [most recent version of ROS](http://wiki.ros.org/kinetic), you will need to be running Ubuntu 16.04 as your OS. We will be using [VirtualBox](https://www.virtualbox.org/manual/ch01.html) to run a custom Ubuntu 16.04 VM image that already has ROS and the other dependencies for this tutorial installed on it.
+To develop in the [ROS Kinetic](http://wiki.ros.org/kinetic), you will need to be running Ubuntu 16.04 as your OS. We will be using [VirtualBox](https://www.virtualbox.org/manual/ch01.html) to run a custom Ubuntu 16.04 VM image that already has ROS and the other dependencies for this tutorial installed on it.
 
 ## Setting Up VirtualBox
 Download VirtualBox from this page: https://www.virtualbox.org/wiki/Downloads
@@ -57,8 +62,8 @@ Review the appliance settings. Because my computer has 12 GB of RAM, I selected 
 Finally, click "Import". Congratulations, you have set up your ROS development environment!
 
 Start up and log into your Ubuntu 16.04 VM using these credentials:
-Username: `robot`
-Password: `robot`
+**Username: `robot`
+Password: `robot`**
 
 Open up the terminal (Ctrl-Alt-t), `cd` into the home directory of `robot`, and run
 ```
@@ -82,8 +87,11 @@ ROS has three levels of concepts: the Filesystem level, the Computation Graph le
 
 ## The ROS Filesystem Level
 The filesystem level concepts mainly cover ROS resources that you encounter on disk, such as:
+
+<a href="#top" class="top" id="quiz_workspace"></a>
 - **Workspaces**: A workspace is a folder where you modify, build, and install ROS packages (also called catkin packages). 
 	- `~/catkin_ws` is the workspace for many of the ROS packages we will write and build in this tutorial.
+<a href="#top" class="top" id="quiz_package"></a>
 - **Packages**: Packages are the main unit for organizing software in ROS. Generally, each package implements some particular functionality that can be integrated into a larger system. A package may contain ROS runtime processes (nodes), a ROS-dependent library, datasets, configuration files, or anything else that is usefully organized together. The most granular thing you can build and release is a package.
 	- If you `cd` into `~/catkin_ws/src`, you will see a directory called `usb_cam`. `usb_cam` is a ROS package (documentation: http://wiki.ros.org/usb_cam). The functionality of `usb_cam` is to interface with standard USB cameras (including webcams) and convert a raw image stream from the camera into a stream of ROS image messages.
 - **Package Manifests**: In the root of each ROS package, there is a file called package.xml, which is the package manifest. Manifests provide metadata about a package, including its name, version, description, license information, dependencies, and other meta information like exported packages.
@@ -95,11 +103,15 @@ The filesystem level concepts mainly cover ROS resources that you encounter on d
 A robot system can be thought of as a peer-to-peer network of sensors, processors, and actuators. Each of these components will run a ROS process. The ROS Computation Graph is the peer-to-peer network of ROS processes that make up one robot system and are processing data together. The basic Computation Graph concepts of ROS are nodes, Master, Parameter Server, messages, and topics.
 
 ![ROS Computation Graph](http://ros.org/images/wiki/ROS_basic_concepts.png)
+<a href="#top" class="top" id="quiz_node"></a>
 - **Nodes**: Nodes are processes that perform computation. ROS is designed to be modular at a fine-grained scale; a robot control system usually comprises many nodes. For example, one node controls a laser range-finder, one node controls the wheel motors, one node performs localization, one node performs path planning, one Node provides a graphical view of the system, and so on. A ROS node is written with the use of a ROS client library, such as roscpp or rospy.
+<a href="#top" class="top" id="quiz_master"></a>
 - **Master**: The ROS Master provides name registration and lookup to the rest of the Computation Graph. Without the Master, nodes would not be able to find each other, exchange messages, or invoke services.
-- **Parameter Server**: The Parameter Server allows data to be stored by key in a central location. It is currently part of the Master.
 - **Messages**: Nodes communicate with each other by passing messages. A message is simply a data structure, comprising typed fields. Standard primitive types (integer, floating point, boolean, etc.) are supported, as are arrays of primitive types. Messages can include arbitrarily nested structures and arrays (much like C structs).
-- **Topics**: Messages are routed via a transport system with publish / subscribe semantics. A node sends out a message by *publishing* it to a given topic. The topic is a name that is used to identify the content of the message. A node that is interested in a certain kind of data will *subscribe* to the appropriate topic. There may be multiple concurrent *publishers* and *subscribers* for a single topic, and a single node may publish and/or subscribe to multiple topics. In general, publishers and subscribers are not aware of each others' existence. The idea is to *decouple the production of information from its consumption*. Logically, one can think of a topic as a strongly typed message bus. Each bus has a name, and anyone can connect to the bus to send or receive messages as long as they are the right type.
+<a href="#top" class="top" id="quiz_topic"></a>
+- **Topics**: Messages are routed via a transport system with publish / subscribe semantics. A node sends out a message by **publishing** it to a given topic. The topic is a name that is used to identify the content of the message. A node that is interested in a certain kind of data will **subscribe** to the appropriate topic. There may be multiple concurrent **publishers** and **subscribers** for a single topic, and a single node may publish and/or subscribe to multiple topics. In general, publishers and subscribers are not aware of each others' existence. The idea is to *decouple the production of information from its consumption*. Logically, one can think of a topic as a strongly typed message bus. Each bus has a name, and anyone can connect to the bus to send or receive messages as long as they are the right type.
+<a href="#top" class="top" id="quiz_param"></a>
+- **ROS Parameters/Parameter Server**: ROS parameters are another mechanism ROS provides to get information to nodes. The idea is that a centralized Parameter Server keeps track of a collection of values—things like integers, floating point numbers, strings, or other data—each identified by a short string name. Because parameters must be actively queried by the nodes that are interested in their values, they are most suitable for configuration settings that will not change (much) over time." [Source](https://cse.sc.edu/~jokane/agitr/agitr-small-param.pdf). 
 
 ## Practice ROS Using Turtlesim
 `turtlesim` is a ROS package that implements a simulated robot turtle. The turtle's position on the screen will change based on input velocity commands. We will see the above ROS concepts in action by using `turtlesim` as an example.
@@ -263,6 +275,7 @@ Subscribed topics:
  * /rosout [rosgraph_msgs/Log] 1 subscriber
 ```
 
+<a href="#top" class="top" id="quiz_message"></a>
 ### ROS Messages
 Communication on topics happens by sending ROS **messages** between nodes. For the publisher (`turtle_teleop_key`) and subscriber (`turtlesim_node`) to communicate, the publisher and subscriber must send and receive the same **type** of message. This means that a topic **type** is defined by the message **type** published on it. The **type** of the message sent on a topic can be determined using `rostopic type`.
 
@@ -330,7 +343,8 @@ Now, let's write a node that makes the turtle spin in a circle clockwise.
 
 Within `~/catkin_ws/src/turtle_control_basic/src`,  create a file with the name `turtle_control_basic_node.cpp` (full path `~/catkin_ws/src/turtle_control_basic/src/turtle_control_basic_node.cpp`). The text editor Gedit comes with Ubuntu, but you can choose to download your own text editor. You can open a file for editing in Gedit by running `gedit [filename]`.
 
-The `turtle_control_basic_node.cpp` code will publish `geometry_msgs/Twist` messages to `/turtle1/cmd_vel`. Copy the following code into the `turtle_control_basic_node.cpp` file:
+<a href="#top" class="top" id="quiz_pub_example"></a>
+The `turtle_control_basic_node.cpp` code will **publish** `geometry_msgs/Twist` messages to `/turtle1/cmd_vel`. Copy the following code into the `turtle_control_basic_node.cpp` file:
 ```cpp
 #include "ros/ros.h"
 
@@ -502,6 +516,8 @@ Here's the condensed version of what's going on:
 - Advertise that we are going to be publishing `geometry_msgs/Twist` messages on the `/turtle1/cmd_vel` topic to the master
 - Loop while publishing messages to `/turtle1/cmd_vel` 10 times a second
 
+
+<a href="#top" class="top" id="quiz_compile"></a>
 ### Building your node using catkin_make
 How do we compile our source code, which depends on code from the ROS packages `roscpp` and `geometry_msgs`, into an executable?
 
@@ -550,6 +566,7 @@ $ rosrun turtlesim turtlesim_node
 ``` 
 And watch that turtle spin!
 
+<a href="#top" class="top" id="quiz_sub"></a>
 ### Subscribers
 The node you built publishes to `/turtle1/cmd_vel`, but does not subscribe to any topics. In contrast, `turtlesim_node` subscribes to  `/turtle1/cmd_vel`.  Upon receiving each `geometry_msgs::Twist` message on `/turtle1/cmd_vel`, `turtlesim_node` calls a **callback function** to moves itself with the commanded velocity.
 
@@ -578,6 +595,8 @@ In the next chapter, you'll learn the basics of the computer vision library Open
 
 <a href="#top" class="top" id="level2"></a>
 # Level 2: Basic OpenCV
+Source: [NVIDIA's Robotics Teaching Kit with 'Jet'](https://developer.nvidia.com/teaching-kits)
+
 To skip to the start of Level 2: `git checkout level2`
 
 In this lab, you will explore a variety of techniques in computer vision. These methods can be used in robot systems to track objects, locate items, or detect obstacles.
@@ -612,8 +631,8 @@ Change the `usb_cam` settings by running the following commands, **only if you a
 2. Edit the file `usb_cam-settings.launch`:
 	`gedit usb_cam-settings.launch`
 3. Find the line that says `<param name="pixel_format" value="mjpeg" />`. Change `mjpeg` to `yuyv`. Save the file.
-	- Note: You can check the pixel format that your webcam outputs by running in a terminal `v4l2-ctl --list-formats-ext | grep Pixel`.
-4.	Relaunch `usb_cam-test.launch` by running `roslaunch usb_cam usb_cam-test.launch`.
+	- Note: You can check the pixel format that your webcam outputs by running in a terminal `v4l2-ctl --list-formats-ext | grep Pixel`. If this command outputs "MJPG", `value` should be set to `mjpeg`.
+4.	Relaunch `usb_cam-test.launch` by running `roslaunch usb_cam usb_cam-test.launch`
 
 You have finished the set up for this level; continue to learn about basic computer vision!
 
@@ -655,6 +674,7 @@ int main(int argc, char **argv)
 ```
 Note: [`ros::spin()`](http://wiki.ros.org/roscpp/Overview/Callbacks%20and%20Spinning) does not return until the node is shutdown. All user callbacks can be called from within the `ros::spin()` call.
 
+<a href="#top" class="top" id="quiz_sub_example"></a>
 Like other types of topics, you subscribe to image topics using a callback. The `imageCallback` function referenced above can be implemented like the code below. The code in this callback function is run every time a the subscriber `raw_image_sub` reads a new image on the `/usb_cam/image_raw` topic.
 ```cpp
 void imageCallback(const sensor_msgs::ImageConstPtr& msg)
@@ -679,7 +699,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
   }
 }
 ```
-In this case, the `cv_bridge::toCvShare` function is used to convert the image topic message to a matrix that OpenCV can use. These OpenCV matrices are grids where each cell has blue, green, and red value. The code above does not modify the image, but merely republishes the same image using the `user/image1` topic.
+In this case, the `cv_bridge::toCvShare` function is used to convert the image topic message to a matrix that OpenCV can use. These OpenCV matrices are grids where each cell has blue, green, and red value. The code above does not modify the image, but merely republishes the same image using the `user/image1` topic. `cv_bridge` is a ROS package that [converts between ROS image messages and OpenCV images](http://wiki.ros.org/cv_bridge).
 
 <a href="#top" class="top" id="compile_basic_cv"></a>
 You can compile the basic_cv node (and all other new source code in your `catkin_ws`) using:
@@ -698,6 +718,57 @@ $ rosrun image_view image_view image:=/user/image1
 ```
 The image that `image_view` reads from `/user/image1` should be the same as the image from the raw camera, because we have not yet used any OpenCV filters within our source code file. In the next section, you will call OpenCV functions to manipulate the input image and publish modified images on `/user/image1`.
 
+<a href="#top" class="top" id="quiz_launchfile"></a>
+### Launch Files
+Earlier, you used `roslaunch` to launch nodes specified in the **launch file** `usb_cam-test.launch`, part of the `usb_cam` package.  Just now, you used `roslaunch` to launch the **launch file** `basic_cv.launch`, part of the `basic_cv` package. `roslaunch` is a tool for easily launching multiple ROS nodes at once. Many ROS packages come with "launch files", which you can run with:
+```
+$ roslaunch [package_name] [file.launch]
+```
+`roslaunch` uses XML files that describe the nodes that should be run, parameters that should be set, and other attributes of launching a collection of ROS nodes. 
+
+Let's take a look at `basic_cv.launch` (in `~/catkin_ws/src/basic_opencv/launch/basic_cv.launch) to see what nodes it launches:
+```xml
+<launch>
+  <include file="$(find usb_cam)/launch/usb_cam-settings.launch"/>
+  <node name="basic_cv" pkg="basic_opencv" type="basic_cv"/>
+</launch>
+```
+#### Launch File  Explained
+([Source: *A Gentle Introduction to ROS* - Jason M. O'Kane.](https://cse.sc.edu/~jokane/agitr/agitr-small-launch.pdf))
+**Inserting the root element**: Launch files are XML documents, and every XML document must have exactly one **root element**. For ROS launch files, the root element is defined by a pair of `launch` tags:
+```xml
+<launch>
+...
+</launch>
+```
+All the other elements of each launch file should be enclosed between these tags.
+
+**Launching nodes**: The heart of any launch file is a collection of node elements, each of which names a single node to launch. A node element looks like this:
+```xml
+<node
+	name="node-name"
+	pkg="package-name"
+	type="executable-name"
+/>
+```
+In our case:
+```xml
+<node name="basic_cv" pkg="basic_opencv" type="basic_cv"/>
+```
+
+**Including other files**: To include the contents of another launch file, including all of its nodes and parameters, use an include element:
+```xml
+<include file="path-to-launch-file" />
+```
+The file attribute expects the full path to the file we want to include. Because it can be both cumbersome and brittle to enter this information directly, most include elements
+use a find substitution to search for a package, instead of explicitly naming a directory:
+```xml
+<include file="$(find package-name)/launch-file-name" />
+```
+In our case:
+```xml
+<include file=$(find usb_cam)/launch/usb_cam-settings.launch"/>
+```
 ### Basic Transformations
 
 #### Grayscale
@@ -765,7 +836,7 @@ The `vision_tracking` node will identify and track a colored object.  Choose an 
 
 ### Topic 1: HSV Segmentation
 
-We have already looked at the BGR and grayscale representations of images, and now we will examine another way of representing images - HSV (Hue, Saturation, and Value).  Like BGR, HSV matrices have three numbers.  The first number, the Hue, is an 8-bit integer that corresponds to the color of the pixel.  The second number, the saturation, is an 8-bit integer that corresponds to the whiteness of the pixel.  The third number, the value, corresponds to the lightness of the pixel.  Computer vision applications that must deal with colors generally prefer the HSV representation because the color of each pixel is encoded in a single number rather than three in the BGR representation.
+We have already looked at the BGR and grayscale representations of images, and now we will examine another way of representing images - HSV (Hue, Saturation, and Value).  Like BGR, HSV matrices have three numbers.  The first number, the Hue, is an 8-bit integer that corresponds to the color of the pixel.  The second number, the saturation, is an 8-bit integer that corresponds to the whiteness of the pixel.  The third number, the value, corresponds to the lightness of the pixel.  Computer vision applications that must deal with colors generally prefer the HSV representation because the color of each pixel is encoded in a single number (Hue) rather than three in the BGR representation.
 
 Our first step in building a tracking program is to find the pixels that are in the object. To do this, we will perform color-based segmentation.  Segmentation is the process of extracting certain components from the image.  The code below creates the `HSV` matrix using the HSV representation of the original image.   Then two scalar values are instantiated.  Finally, the `inRange` function is called.  The `inRange` function call sets the `mask` matrix's pixels to 255 when the corresponding `HSV` matrix pixel is within the range of the two thresholds and to 0 when it is outside the range.  Add the code below to the `imageCallback` function.
 ```cpp
@@ -782,8 +853,60 @@ cv::inRange(hsv, lower_thresh, upper_thresh, mask);
 //Conert the image back to BGR
 cv::cvtColor(mask, dst, CV_GRAY2BGR);
 ```
+We left the hue, saturation, and value parameters for the upper and lower thresholds as variables, so we can dynamically change them while the node is running. `hue_lower`,  `hue_upper`,  `sat_lower`,  `sat_upper`, `value_lower`, and `value_upper` are  actually all set as ROS parameters. Recall our introduction [here](#quiz_param) about ROS parameters. In the case of the `vision_tracking` program, the Parameter Server keeps track of a collection of integers, each identified by a short string name, that function as "settings" for our vision tracker that can be changed at runtime. These parameters and their default values are specified in `cfg/Hue.cfg` of our `basic_opencv` package:
+```python
+#!/usr/bin/env python
+PACKAGE = "basic_opencv"
 
-We left the hue, saturation, and value parameters for the upper and lower thresholds as variables, so we can dynamically change them while the node is running.  To try this, launch the `vision_tracking` node:
+from dynamic_reconfigure.parameter_generator_catkin import *
+
+gen = ParameterGenerator()
+
+gen.add("hue_upper", int_t, 0, "hue_upper", 120, 0, 180)
+gen.add("hue_lower", int_t, 0, "hue_lower", 80, 0, 180)
+gen.add("sat_upper", int_t, 0, "sat_upper", 255, 0, 255)
+gen.add("sat_lower", int_t, 0, "sat_lower", 0, 0, 255)
+gen.add("value_upper", int_t, 0, "value_upper", 255, 0, 255)
+gen.add("value_lower", int_t, 0, "value_lower", 0, 0, 255)
+
+exit(gen.generate(PACKAGE, "basic_opencv", "Hue"))
+```
+Then, after the node has been initialized, values of the parameters are read into global variables.
+```cpp
+int main(int argc, char **argv)
+{
+  ros::init(argc, argv, "vision_tracking");
+  ros::NodeHandle nh;
+
+  ros::NodeHandle nh_("~");
+
+  // The method calls below have the form nh_.param<type>("specified_parameter", variable_to_store_parameter_value_in, default_value)
+  // The NodeHandle method below gets the parameter values for hue_lower, hue_upper, etc. and stores them
+  // into the global variables declared at the beginning of the file in the line:
+  //	int hue_lower, hue_upper, sat_lower, sat_upper, value_lower, value_upper;
+  // The default value is used if the specified parameter cannot be retrieved from the parameter server
+  // See 0.0.2 of http://wiki.ros.org/roscpp_tutorials/Tutorials/Parameters
+  nh_.param<int>("hue_lower", hue_lower, 80);
+  nh_.param<int>("hue_upper", hue_upper, 150);
+  nh_.param<int>("sat_lower", sat_lower, 20);
+  nh_.param<int>("sat_upper", sat_upper, 255);
+  nh_.param<int>("value_lower", value_lower, 20);
+  nh_.param<int>("value_upper", value_upper, 255);
+```
+Recall that `hue_lower`, `hue_upper`, `sat_lower`, `sat_upper`, `value_lower`, and `value_upper` were referenced in the `imageCallback` function to define a HSV range to filter for:
+```cpp
+//Define the range of blue pixels
+cv::Scalar lower_thresh(hue_lower, sat_lower, value_lower);
+cv::Scalar upper_thresh(hue_upper, sat_upper, value_upper);
+```
+<a href="#top" class="top" id="compile_vision_tracking"></a>
+To try the `vision_tracking` node with dynamically reconfigurable hue, saturation, and value ranges, recompile your code using:
+```
+$ cd ~/catkin_ws
+$ catkin_make
+```
+
+Then, launch the `vision_tracking` node:
 ```
 $ roslaunch basic_opencv vision_tracking.launch
 ```
@@ -798,7 +921,7 @@ Finally, start the dynamic reconfigure GUI:
 $ rosrun rqt_reconfigure rqt_reconfigure
 ```
 
-Try updating the values of the hue, value, and saturation in the GUI until you are able to isolate the object.  Start by adjusting only the hue values according to the color of your object.  The list below provides some suggestions:
+Try updating the values of the hue, value, and saturation in the GUI until you are able to isolate the object.  Start by adjusting only the hue values according to the color of your object.  The list below provides the hue ranges of various colors:
 
 - Red: (0, 15), (160, 180)
 - Yellow: (20, 45)
@@ -827,17 +950,99 @@ OpenCV has a special datatype called `Moment` that stores the moments of an imag
 
 To visualize the center of mass, add a function that draws a red circle where the center of mass is located.  The OpenCV function to do this is `circle`.  Add the red circle to the `dst` matrix after the initialization of `dst` from `mask`.
 
-Now you can recompile and relaunch the `vision_tracking` node along with the reconfigure GUI and image_view.  You should now see a red dot that is located at the center of your object.  This system could be used by robots to find the ball in a game of soccer or locate fruit on a tree for harvesting.  Try using a different colored object to see if you can locate it as well.
+Now you can recompile and relaunch the `vision_tracking` node along with the reconfigure GUI and image_view [(refresher on how to do so)](#compile_vision_tracking) .  You should now see a red dot that is located at the center of your object.  This system could be used by robots to find the ball in a game of soccer or locate fruit on a tree for harvesting.  Try using a different colored object to see if you can locate it as well.
 
+# Review
+- [What is a catkin workspace?](#quiz_workspace)
+- [What is a ROS package?](#quiz_package)
+- [How do you build ROS packages?](#quiz_compile)
+- Define the following ROS components:
+	- [node](#quiz_node)
+	- [topic](#quiz_topic)
+	- [publisher](#quiz_topic) ([Code Example](#quiz_pub_example))
+	- [subscriber](#quiz_sub) ([Code Example](#quiz_sub_example))
+	- [master](#quiz_master)
+	- [message](#quiz_message)
+- [What does a launch file do?](#quiz_launchfile)
 
-<a href="#top" class="top" id="level3"></a>
-# Level 3: Using CV Output to Actuate the Turtle
-To skip to the start of Level 3: `git checkout level3`
+Congratulations! You've got the fundamentals down, and are ready to build larger robotics projects using ROS!
 
-<a href="#top" class="top" id="level4"></a>
-# Level 4: Face Detection using OpenCV
-To skip to the start of Level 4: `git checkout level4`
+<a href="#top" class="top" id="rrp_table_of_contents"></a>
+# Choose Your Own Adventure: *ROS Robotics Projects*
+One of my favorite things about ROS is that the loose coupling of nodes and the abundance of open-source software makes it possible for beginners to assemble a robot system by plug-and-playing ROS packages for the various functionalities.
 
-<a href="#top" class="top" id="level5"></a>
-# Level 5: What’s next?
-To skip to the start of Level 5: `git checkout level5`
+The projects from *ROS Robotics Projects* will allow you to experiment with various open-source ROS packages that you may want to incorporate into your own ROS projects.
+
+Here are some recommended projects that don't require extra hardware:
+- [Chapter 2: Face Detection using OpenCV](#adventure_face_detection)
+- [Chapter 3: Building a Siri-Like Chatbot in ROS](#adventure_chatbot)
+- [Chapter 6: Object Detection and Recognition](#adventure_objectdetection)
+- [Chapter 7: Deep Learning using ROS and Tensorflow](#adventure_deeplearning)
+- [Chapter 8.5: ROS on Android](#adventure_android)
+
+If you have access to an Arduino, here are some tutorials for using ROS with Arduino:
+- http://wiki.ros.org/rosserial_arduino/Tutorials
+
+<a href="#top" class="top" id="adventure_face_detection"></a>
+##  Chapter 2: Face Detection using OpenCV
+### Start reading Chapter 2 [here](http://proquest.safaribooksonline.com.ezproxy.cul.columbia.edu/book/hardware/9781783554713/ros-robotics-projects/ch02_html?uicode=columbia).
+**Note: In the book, the Face Detection project is a component of a larger Face Detection and Tracking project using Dynamixel Servos.** The original code for this project has portions that depend on the servo code. We modified the project code so that the face detection portion can bue built and run on its own. This modified version of the code for this project is already in `~/catkin_ws/src/face_tracker_pkg`. Some of the instructions for this project will change because of the modifications.  **Each heading below corresponds to the title of a page in the book, and the text below the heading describes how your project differs from the book's.**
+- **Headings with SKIP affixed to them indicate pages that can skipped witout loss of understanding.**
+- **Headings with READ & SKIP may be useful to read, but you don't need to follow the instructions on the page.**
+- **All other headings indicate pages that should be read, and the instructions within them executed, with possible modification.**
+
+###   Chapter 2. Face Detection and Tracking Using ROS, OpenCV and Dynamixel Servos
+- We will not be mounting a USB webcam on an AX-12 Dynamixel servo, nor controlling the servo. However, we will be covering:
+	- An overview of the project
+	- Software prerequisites
+	- Creating ROS packages for a face tracker and controller
+	- The ROS-OpenCV interface
+	- Implementing a face tracker
+### Overview of the project
+- There will be no Dynamixel servo tracking component. Our version of the project will involve only one ROS package, for face detection and finding the centroid of the face. This package, called `face_tracking_pkg`, is already inside `~/ros_robotics_projects_ws/src`, so **no source code needs to be re-cloned.**
+### Hardware and software prerequisites
+- If you were able to complete Level 2, then you've satisfied all of the software prerequisites. (Recognize any of ROS packages in the table? You used `usb_cam` and `cv_bridge` for Level 2 as well!)
+### Installing dependent ROS packages - SKIP
+### Installing the usb_cam ROS package - READ & SKIP
+### Creating a ROS workspace for dependencies - SKIP
+- The workspace `~/ros_project_dependencies_ws` is included with the RoboticsTrack VirtualBox image, so you do not need to create a new workspace for keeping project dependencies. The line `source ~/ros_project_dependencies_ws/devel/setup.bash` is already in `~/.bashrc`, which is necessary for environment setup.
+### Interfacing Dynamixel with ROS - SKIP
+### Creating face tracker ROS packages - READ & SKIP
+- The workspace `~/ros_robotics_projects_ws ` came included with the RoboticsTrack VirtualBox image, so you do not need to create a new workspace for keeping ROS project files. The line `source ~/ros_robotics_projects_ws/devel/setup.bash` is already in `~/.bashrc`, which is necessary for environment setup.
+- You do not need to git clone the source code of the book from GitHub; `~/ros_robotics_projects_ws/src` already has the packages necessary for the projects mentioned in this tutorial.
+- You can read about the dependencies of `face_tracker_pkg`, but you do not need to use `catkin_create_pkg` to create a new `face_tracker_pkg` yourself.
+- Please read the section **The interface between ROS and OpenCV**, as a refresher of what we learned in Level 2.
+### Working with the face-tracking ROS package
+- Note that there will be `face_tracker_control` package
+- You can enter the `face_tracker_pkg` by typing `roscd face_tracker_pkg` or going to `~/ros_robots_projects_ws/src/face_tracker_package`
+### Understanding the face tracker code
+- This page refers to code in `~/ros_robotics_projects_ws/src/face_tracker_package/src/face_tracker_node.cpp`.
+
+### Understanding CMakeLists.txt
+ - This page refers to code in `~/ros_robotics_projects_ws/src/face_tracker_package/CMakeLists.txt`
+### The track.yaml file
+- [Review of ROS Parameters](#quiz_param)
+-  You don't need to change any parameters in `track.yaml`
+### The launch files - READ & SKIP
+- For our version of the project, `start_usb_cam.launch` (full path `~/ros_robotics_projects_ws/src/face_tracker_pkg/launch/start_usb_cam.launch`) contains only the following:
+```xml
+<launch>
+<!-- Launching USB CAM launch file -->
+<
+```
+
+<a href="#top" class="top" id="adventure_chatbot"></a>
+## Chapter 3: Building a Siri-Like Chatbot in ROS
+### Start reading Chapter 3 [here](http://proquest.safaribooksonline.com.ezproxy.cul.columbia.edu/book/hardware/9781783554713/ros-robotics-projects/ch03_html?uicode=columbia).
+
+#### Installing PyAIML on Ubuntu 16.04 LTS
+Please use 
+
+<a href="#top" class="top" id="adventure_objectdetection"></a>
+## Chapter 6: Object Detection and Recognition
+
+<a href="#top" class="top" id="adventure_deeplearning"></a>
+## Chapter 7: Deep Learning using ROS and Tensorflow
+
+<a href="#top" class="top" id="adventure_android"></a>
+## Chapter 8.5: ROS on Android
