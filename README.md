@@ -9,27 +9,31 @@ Portions of this tutorial are adapted from [NVIDIA's Robotics Teaching Kit with 
 
 ## About this Tutorial
 
-This tutorial differs from other DevFest tracks in that it does not work towards one specific final product. Instead, Levels 0 - 2 provide learners with an environment setup and practice with ROS and computer vision basics.
+This tutorial differs from other DevFest tracks in that it does not work towards one specific final product. Instead, Levels 0 - 2 provide learners with a Linux environment for ROS development and practice with ROS and computer vision basics.
 
-Levels 1 and 2 have their own branch in the [GitHub repository](https://github.com/rachelruijiayang/catkin_ws) for our ROS workspace (`~/catkin_ws`). If you don't want  to do Level 1, go to `~/catkin_ws` and `git checkout level2`. If you don't want to do Level 2, `git checkout adventure`.
+Levels 1 and 2 have their own branch in the [GitHub repository](https://github.com/rachelruijiayang/catkin_ws) for our Level 1 and 2 ROS workspace (`~/catkin_ws`). If you don't want  to do Level 1, go to `~/catkin_ws` and `git checkout level2`. If you don't want to do Level 2, `git checkout adventure`.
 
-After Level 2, you will have the skills to work on projects of your choice from Lentin Joseph's *ROS Robotics Projects*. We could not reproduce the contents of that book in this tutorial for copyright reasons, but the book is available to Columbia students for free through [CLIO](https://clio.columbia.edu/quicksearch?q=ros+robotics+projects). We've starred our favorite projects and provided tips and adjustments for them [here](#rrp_table_of_contents).
+After Level 2, you will have the skills to work on projects of your choice from Lentin Joseph's *ROS Robotics Projects*. We cannot reproduce the contents of that book in this tutorial for copyright reasons, but the book is available to Columbia students for free through [CLIO](https://clio.columbia.edu/quicksearch?q=ros+robotics+projects). We've starred our favorite projects and provided tips and adjustments for them [here](#rrp_table_of_contents).
 
 ## Why learn ROS?
-ROS is an open-source framework for building robots. 
+[[Source]](https://answers.ros.org/question/12230/what-is-ros-exactly-middleware-framework-operating-system/)
 
-A robot is a system in which sensors (such as cameras) connect to processors, which connect to actuators to make the robot move (or make some other decision). ROS provides a publish-subscribe messaging infrastructure that makes it easier for different parts of a robot system to talk to each other. In Levels 1 and 2 of this tutorial, you will write your own ROS publisher and subscriber in C++.
+ROS is an open-source framework for building robots.
 
-ROS also provides an extensive set of tools for configuring, starting, debugging, simulating, testing, and stopping robot systems. In this tutorial, you will familiarize yourself with the tools  rqt_graph, rostopic, rospub, rosnode, and more.
+A robot is a system in which sensors (such as cameras and microphones) connect to processors, which connect to actuators to make the robot move (or make some other decision, such as image classification or speech output). ROS provides a publish-subscribe messaging infrastructure that makes it easier for different parts of a robot system to talk to each other. In Levels 1 and 2 of this tutorial, you will write your own ROS publisher and subscriber in C++.
 
-Finally, ROS provides a broad collection of open-source libraries that implement useful robot functionality, with a focus on mobility, manipulation, and perception, and a large active developer community. [[Source]](https://answers.ros.org/question/12230/what-is-ros-exactly-middleware-framework-operating-system/) Level 2 of this tutorial walks you through the basics of one ROS-integrated library, OpenCV. After Level 2, you will have the skills to play with open source ROS packages and integrations for chatbots, deep learning, and more.
+ROS also provides an extensive set of tools for configuring, starting, debugging, simulating, testing, and stopping robot systems. Throughout this tutorial, you will get to use the tools [rqt_graph](http://wiki.ros.org/rqt_graph), [rostopic](http://wiki.ros.org/rostopic), [rosnode](http://wiki.ros.org/rosnode), and more.
+
+ROS provides a broad collection of integrations open-source libraries that implement useful robot functionality, with a focus on mobility, manipulation, and perception. After learning ROS basics, you will build a vision-tracking program using the ROS-integrated computer vision library [OpenCV](#level2). Then, you will be able to play with open source ROS packages and integrations for [chatbots](#adventure_chatbot), [deep learning](#adventure_deeplearning), and more.
+
+Finally ROS has a large active developer community and wide usage in the robotics industry. answer.ros.org is a site dedicated to answering questions of the ROS community (basically StackOverflow for ROS). [Here's](http://proquest.safaribooksonline.com.ezproxy.cul.columbia.edu/book/hardware/9781783554713/1dot-getting-started-with-ros-robotics-application-development/ch01s09_html?uicode=columbia) a list of opportunities for ROS in industry and research.
 
 [Here are some past robots that have been built using ROS.](https://www.youtube.com/watch?v=Z70_3wMFO24)
 
 ## Prerequisites
-
  - A computer with a webcam (required for the computer vision sections)
- - At least 25 GB of free storage space on your computer (to install the VM)
+ - At least 10 GB of free storage space on your computer (to install the VM)
+	 - Note: You will only need around 9 GB for Level 0, 1, and 2 of this tutorial. This VM will automatically expand to up to 30 GB as  you install ROS packages of your choice for the Choose Your Own Adventure portion. If you want to manually allocate more space to your VM, follow the instructions in [this link](https://www.howtogeek.com/124622/how-to-enlarge-a-virtual-machines-disk-in-virtualbox-or-vmware/).
  - Prior programming experience, especially in C++ and Python
  - Familiarity with using the Linux terminal
 
@@ -65,19 +69,10 @@ Start up and log into your Ubuntu 16.04 VM using these credentials:
 **Username: `robot`
 Password: `robot`**
 
-Open up the terminal (Ctrl-Alt-t), `cd` into the home directory of `robot`, and run
-```
-$ git clone https://github.com/rachelruijiayang/catkin_ws.git
-```
-to download the workspace in which you will be writing and building your code. Then, at the bottom of `~/.bashrc`, add the line:
-```
-source ~/catkin_ws/devel/setup.bash
-```
-to add our `catkin_ws` into the PATH that ROS uses to search for executables. Finally, run
-```
-$ source ~/.bashrc
-```
-to reload your `bash` settings.
+For your own convenience, Click on Devices -> Shared Clipboard -> Bidirectional. Now you can copy/paste from the host to the VM and back!
+
+Open up a termnal using Ctrl+Alt+t, or by clicking on the Ubuntu Start Icon (at the top left corner of your screen) and typing in "terminal" into the Search bar.
+![enter image description here](https://github.com/rachelruijiayang/curc_devfest/blob/master/resources/ubuntu_start.png?raw=true)
 
 <a href="#top" class="top" id="level1"></a>
 # Level 1: Intro to ROS
@@ -624,6 +619,7 @@ If everything works fine, you will be able to view the camera input, and logs wi
 
 #### Note: 
 If you get random-colored pixels above a green background, it is likely because your webcam outputs a different format than the default that this tutorial's `usb_cam` package expects:
+
 ![enter image description here](https://github.com/rachelruijiayang/curc_devfest/blob/master/resources/yuyv_error.PNG?raw=true)
 Change the `usb_cam` settings by running the following commands, **only if you are getting the erroneous display above**:
 1. Enter the directory of the `usb_cam` ROS package, and then enter the launch folder:
